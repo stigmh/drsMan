@@ -1,32 +1,31 @@
 #include <stdio.h>
 
+#include "FileManager.h"
 #include "DRSFormat.h"
 
-//#define DSR_FILE "Interfac.drs"
-//#define DSR_FILE "sounds.drs"
-#define DSR_FILE "generated.dsr"
+//#define DRS_FILE "Interfac.drs"
+#define DRS_FILE "sounds.drs"
+//#define DRS_FILE "generated.drs"
 
-#if OS_IS_WINDOWS
-#define FILE_PATH "C:\\Program Files (x86)\\Microsoft Games\\Age of Empires\\data\\" DSR_FILE
+#ifdef OS_IS_WINDOWS
+#define FILE_PATH "C:\\Program Files (x86)\\Microsoft Games\\Age of Empires\\data\\" DRS_FILE
 #else
-#define FILE_PATH "../" DSR_FILE
+#define FILE_PATH "../" DRS_FILE
 #endif
 
 int main(int argc, char* argv[]) {
-    dsr_t dsr;
+    drs_t drs;
     int rc;
 
-    //interfac.drs
-    rc = dsr_load(FILE_PATH, &dsr);
-
+    rc = drs_load(FILE_PATH, &drs);
 
     if (rc) {
         printf("RETURNED %d\n", rc);
     } else {
-        dsr_print_header(&dsr, stdout);
-        dsr_extract_archive(&dsr, "dsrFiles");
-        //dsr_create_archive(&dsr, "../generated.drs");
-        dsr_free(&dsr);
+        drs_print_header(&drs, stdout);
+        drs_extract_archive(&drs, "drsFiles");
+        //drs_create_archive(&drs, "../generated.drs");
+        drs_free(&drs);
     }
 
     return rc;

@@ -1,1 +1,13 @@
 .DS_Store
+*.DSym
+x64
+.vs
+Debug
+Release
+drsFiles
+*.exe
+*.ilk
+*.pdb
+*.o
+*.VC.db
+*.VC.opendb
