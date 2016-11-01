@@ -8,6 +8,17 @@ int is_readable_ascii_char(char c) {
     return ('~' >= c) && (c >= ' ');
 }
 
+void drs_init_empty(pDrs_t drs) {
+    if (!drs) {
+        return;
+    }
+
+    memset(drs, 0, sizeof(drs_t));
+    
+    drs->fileSize = DRS_HDR_COPYRIGHT_LENGTH + DRS_HDR_VERSION_LENGTH
+        + DRS_HDR_TYPE_LENGTH + (2 * sizeof(int));
+}
+
 int drs_load(const char* filePath, drs_t* drs) {
     int idx;
     int iidx;

@@ -51,6 +51,7 @@ typedef struct s_drs {
     size_t       fileSize;
 } drs_t, *pDrs_t;
 
+void drs_init_empty(pDrs_t drs);
 int drs_load(const char* filePath, drs_t* drs);
 void drs_free(drs_t* drs);
 
