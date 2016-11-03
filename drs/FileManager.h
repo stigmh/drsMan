@@ -23,6 +23,7 @@ int file_put_contents(const char* filePath, unsigned char* buffer, size_t size);
 
 int file_exists(const char* filePath);
 int directory_exists(const char* filePath);
+int directory_scan(const char* dirName, const char* contents, size_t* size);
 int create_directory(const char* directoryName);
 
 #endif

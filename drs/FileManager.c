@@ -5,12 +5,17 @@
 #include "FileManager.h"
 
 #ifdef OS_IS_WINDOWS
+#include <windows.h>
 #include <io.h>
 #include <direct.h>
+#include <tchar.h>
+#include <strsafe.h>
 #define FD_ACCESS(p, d) _access(p, d)
 #define MK_DIR(d) _mkdir(d)
+#pragma comment(lib, "User32.lib")
 #else
 #include <unistd.h>
+#include <dirent.h>
 #define FD_ACCESS(p, d) access(p, d)
 #define MK_DIR(d) mkdir(d, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
 #endif
@@ -186,4 +191,64 @@ int create_directory(const char* directoryName) {
     }
 
     return MK_DIR(directoryName);
+}
+
+int directory_scan(const char* dirName, const char* contents, size_t* size) {
+#ifdef OS_IS_WINDOWS
+    TCHAR szDir[MAX_PATH];
+    size_t argLength;
+    WIN32_FIND_DATA findData;
+    HANDLE fileHandle = INVALID_HANDLE_VALUE;
+    LARGE_INTEGER filesize;
+#else
+    DIR *dp;
+    struct dirent *ep;
+#endif
+
+    if (!dirName || !contents || !size) {
+        fprintf(stderr, "%s: invalid parameters\n", __FUNCTION__);
+        return 1;
+    }
+
+    if (!directory_exists(dirName)) {
+        fprintf(stderr, "%s: not a directory: %s\n", __FUNCTION__, dirName);
+        return 1;
+    }
+
+#ifdef OS_IS_WINDOWS
+    StringCchLength(dirName, MAX_PATH, &argLength);
+
+    if (argLength > (MAX_PATH - 3)) {
+        fprintf(stderr, "%s: too long directory name: %llu (max %u)\n",
+            __FUNCTION__, (unsigned long long)argLength, MAX_PATH);
+        return 1;
+    }
+
+    StringCchCopy(szDir, MAX_PATH, dirName);
+    StringCchCat(szDir, MAX_PATH, TEXT("\\*"));
+
+    if ((fileHandle = FindFirstFile(szDir, &findData)) != INVALID_HANDLE_VALUE) {
+        do {
+            if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                printf(" <DIR> %s\n", findData.cFileName);
+            } else {
+                filesize.LowPart = findData.nFileSizeLow;
+                filesize.HighPart = findData.nFileSizeHigh;
+                printf(" %s   %lld bytes\n", findData.cFileName, filesize.QuadPart);
+            }
+        } while (FindNextFile(fileHandle, &findData));
+#else
+    if ((dp = opendir(dirName))) {
+        while (ep = readdir(dp)) {
+            printf("%s\n", ep->d_name);
+        }
+
+        (void)closedir(dp);
+#endif
+    } else {
+        fprintf(stderr, "%s: couldn't open directory %s\n", __FUNCTION__, dirName);
+        return 1;
+    }
+
+    return 0;
 }

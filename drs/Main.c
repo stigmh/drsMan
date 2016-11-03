@@ -64,7 +64,9 @@ void usage(void) {
 int main(int argc, char* argv[]) {
     drs_t drs;
     config_t config;
-    int rc;
+    size_t dirEntries;
+    char *contents = argv[0]; // temporary
+    int rc = 0;
 
     if (parseParams(argc, argv, &config)) {
         usage();
@@ -72,7 +74,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (config.extract) {
-        rc = drs_load(FILE_PATH, &drs);
+        rc = drs_load(config.filePath, &drs);
 
         if (rc) {
             printf("RETURNED %d\n", rc);
@@ -83,7 +85,8 @@ int main(int argc, char* argv[]) {
             drs_free(&drs);
         }
     } else {
-        
+        drs_init_empty(&drs);
+        rc = directory_scan(config.filePath, contents, &dirEntries);
     }
 
     return rc;
